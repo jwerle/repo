@@ -3,6 +3,24 @@
 #define __REPO_H__
 
 
+#if __GNUC__ >= 4
+# define REPO_EXTERN(type) extern \
+   __attribute__((visibility("default"))) \
+ type
+#elif define(_MSC_VER)
+# define REPO_EXTERN(type) __declspec(dllexport) type
+#else
+# define REPO_EXTERN(type) extern type
+#endif
+
+
+#ifdef _MSC_VER
+# define REPO_INLINE(type) static __inline type
+#else
+# define REPO_INLINE(type) static inline type
+#endif
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -45,16 +63,16 @@ typedef struct repo_user {
 } repo_user_t;
 
 
-repo_user_t *
+REPO_EXTERN(repo_user_t *)
 repo_user_new ();
 
-repo_t *
+REPO_EXTERN(repo_t *)
 repo_new (char *path);
 
-void
+REPO_EXTERN(void)
 repo_free (repo_user_t *user);
 
-repo_t *
+REPO_EXTERN(repo_t *)
 repo_set (repo_user_t *user, char *path);
 
 #ifdef __cplusplus
