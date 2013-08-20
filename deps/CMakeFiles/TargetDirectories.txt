@@ -1,0 +1,2 @@
+/Users/jwerle/repos/libgit2/build/CMakeFiles/git2.dir
+/Users/jwerle/repos/libgit2/build/CMakeFiles/libgit2_clar.dir
