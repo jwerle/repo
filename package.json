@@ -1,0 +1,25 @@
+{
+  "name": "repo",
+  "version": "0.0.1",
+  "description": "Manage your repositories with Git",
+  "main": "y",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jwerle/repo.git"
+  },
+  "keywords": [
+    "repo",
+    "git"
+  ],
+  "author": "Joseph Werle",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jwerle/repo/issues"
+  }
+}
