@@ -1,15 +1,27 @@
 
+#include <assert.h>
 #include "repo.h"
 
 
 repo_user_t *
 repo_user_new () {
   repo_user_t *user;
+  long size;
+  char cwd[256];
   struct passwd *pw = getpwuid(getuid());
   const char *homedir = pw->pw_dir;
-  if (!(user = malloc(sizeof(repo_user_t)))) return NULL;
-  strcpy(user->name, getlogin());
-  strcpy(user->homedir, homedir);
+  
+  if (!(user = malloc(sizeof(repo_user_t)))) 
+    return NULL;
+
+  user->name = getlogin();
+  user->homedir = homedir;
+
+  if (!getcwd(cwd, sizeof(cwd)) && ERANGE != errno) {
+    perror("repo: user: error: failed to set cwd");
+    exit(0);
+  }
+  
   return user;
 }
 
@@ -17,8 +29,11 @@ repo_user_new () {
 repo_t *
 repo_new (char *path) {
   repo_t *repo;
-  if (!(repo = malloc(sizeof(repo_t)))) return NULL;
-  strcpy(repo->path, path);
+  
+  if (!(repo = malloc(sizeof(repo_t)))) 
+    return NULL;
+
+  repo->path = path;
   return repo;
 }
 
@@ -42,62 +57,63 @@ repo_free (repo_user_t *user) {
 
 repo_dir_t *
 repo_dir_new (char *path) {
+  struct dirent *fd;
   repo_dir_t *dir;
   DIR *dir_;
-  struct dirent *fd;
-  int i = 0, n = 0;
 
   if (!(dir = malloc(sizeof(repo_dir_t))))
     return NULL;
-
-  strcpy(dir->path, path);
-  printf("%s\n", path);
+  
   if (!(dir_ = opendir(path)))
     return NULL;
 
-  dir->items = malloc(sizeof(repo_dir_item_t *));
+  dir->length = 0;
+  dir->path = path;
 
   while ((fd = readdir(dir_))) {
-    printf("%s\n", fd->d_name);
     if (0 == strncmp(".", &fd->d_name[0], 1)) continue;
-   // dir->items = (repo_dir_item_t*)realloc(dir->items, sizeof(repo_dir_item_t) * dir->items);
-    dir->items[i++] = *repo_dir_item_new(fd, dir);
+    repo_dir_item_t *item = repo_dir_item_new(path, fd, dir);
   }
-
-  if (0 != errno) {
-    perror("");
-    exit(0);
-  }
-
-  dir->length = i;
-
-  puts("biz");
-
-  // closedir(dir_);
-
-  puts("bif");
-
-  //exit(0);
-
+  
+  closedir(dir_);
+  
   return dir;
 }
 
 
 
 repo_dir_item_t *
-repo_dir_item_new (struct dirent *fd, repo_dir_t *root) {
-  repo_dir_item_t *item;
-  char *path = malloc(sizeof(char *));
-  if (!(item = malloc(sizeof(repo_dir_item_t)))) return NULL;
-  item->ino = (int *)fd->d_ino;
-  strcpy(item->name, fd->d_name);
-  sprintf(path, "%s/%s", root->path, item->name);
-  strcpy(item->path, path);
-  free(path);
- // printf("--- %s\n", path);
+repo_dir_item_new (char *root, struct dirent *fd, repo_dir_t *dir) {
+  int i = dir->length++;
+  repo_dir_item_t *item = &dir->items[i];
+  if (!item) return NULL;
+  
+  char *name = malloc(REPO_NAME_MAX * sizeof(char *));
+  sprintf(name, "%s", fd->d_name);
+  
+  char *path = malloc(REPO_PATH_MAX * sizeof(char *));
+  sprintf(path, "%s/%s", root, fd->d_name);
+
+  item->fd_ = fd;
+  item->ino = (int)fd->d_ino;
+  item->name = name;
+  item->path = path;
+  item->is_git_repo = false;
+
+  if (true == repo_is_git_repo(item)) {
+    repo_git_init(item);
+  }
+
+  assert((int) strlen(item->name) == (int) strlen(fd->d_name));
+
+  // if (0 != errno && ENOENT != errno) {
+  //   fprintf(stderr, "(%s): ", item->path);
+  //   perror("repo: dir: item: error:");
+  //   exit(0);
+  // }
+
   return item;
 }
-
 
 
 

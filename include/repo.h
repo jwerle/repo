@@ -20,8 +20,10 @@
 # define REPO_INLINE(type) static inline type
 #endif
 
+
 #define REPO_PATH_MAX 4096
 #define REPO_NAME_MAX 256
+#define REPO_MAX_DIR_SIZE 500
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,8 +32,10 @@ extern "C" {
 #include <unistd.h> // getlogin(), getcwd(), getuid()
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <pwd.h> // getpwuid()
 #include <dirent.h> // readdir(), opendir(), scandir()
 #include <errno.h>
@@ -47,7 +51,7 @@ extern "C" {
  */
 
 typedef struct repo {
-  char path[REPO_PATH_MAX];
+  char *path;
 } repo_t;
 
 
@@ -59,21 +63,24 @@ typedef struct repo {
  */
 
 typedef struct repo_user {
-  char cwd[REPO_PATH_MAX];
-  char homedir[REPO_PATH_MAX];
-  char name[REPO_NAME_MAX];
+  char *name;
+  char *cwd;
+  const char *homedir;
   repo_t *repo;
 } repo_user_t;
 
 
 
 typedef struct repo_dir_item {
-  int *ino;
-  char name[REPO_NAME_MAX];
-  char path[REPO_PATH_MAX];
-  int *length;
-  char *type;
-  struct dirent *dirent_;
+  int ino;
+  bool is_git_repo;
+  bool is_git_orphan;
+  char *name;
+  char *path;
+  const char *git_branch;
+  struct dirent *fd_;
+  git_repository *git_repo;
+  git_reference *git_head;
 } repo_dir_item_t;
 
 
@@ -85,13 +92,10 @@ typedef struct repo_dir_item {
  */
 
 typedef struct repo_dir {
-  char path[REPO_PATH_MAX];
-  repo_dir_item_t *items;
+  char *path;
   int length;
-  DIR *dir_;
+  repo_dir_item_t items[REPO_MAX_DIR_SIZE];
 } repo_dir_t;
-
-
 
 
 REPO_EXTERN(repo_user_t *)
@@ -106,14 +110,28 @@ repo_free (repo_user_t *user);
 REPO_EXTERN(repo_t *)
 repo_set (repo_user_t *user, char *path);
 
+
+// dir
 REPO_EXTERN(void)
-repo_ls (repo_t *repo);
+repo_dir_ls (repo_t *repo);
 
 REPO_EXTERN(repo_dir_t *)
 repo_dir_new (char *path);
 
 REPO_EXTERN(repo_dir_item_t *)
-repo_dir_item_new (struct dirent *fd, repo_dir_t *root);
+repo_dir_item_new(char *root, struct dirent *fd, repo_dir_t *dir);
+
+
+// git
+REPO_EXTERN(void)
+repo_git_check (int error, const char *message, const char *extra);
+
+REPO_EXTERN(void)
+repo_git_init (repo_dir_item_t *item);
+
+REPO_EXTERN(bool)
+repo_is_git_repo (repo_dir_item_t *item);
+
 
 #ifdef __cplusplus
 }

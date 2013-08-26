@@ -1,14 +1,19 @@
 
+#include <assert.h>
 #include "repo.h"
 
 void
-repo_ls (repo_t *repo) {
+repo_dir_ls (repo_t *repo) {
   repo_dir_t *dir = repo_dir_new(repo->path);
-  printf("len-%d\n", dir->length);
-  printf("%s\n", dir->items[0].name);
+  
+  assert(dir->path);
+  assert(dir->items);
+  assert(dir->length);
+
   for (int i = 0; i < dir->length; ++i) {
-    printf("%s\n"
-        , dir->items[i].path);
-        //, dir->items[i].path);
+    repo_dir_item_t *item = &dir->items[i];
+    if (item->is_git_repo && !item->is_git_orphan) {
+      printf("%s (%s)\n", item->name, item->git_branch);
+    }
   }
 }
