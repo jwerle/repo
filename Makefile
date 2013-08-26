@@ -8,7 +8,7 @@ BIN = repo
 CFLAGS = -std=c99 -lm -I deps -I include
 
 repo: $(SRC)
-	$(CC) $^ $(CFLAGS) -o $@
+	$(CC) $^ main.c $(CFLAGS) -o $@
 
 install:
 	install $(BIN) $(PREFIX)/bin
@@ -17,6 +17,7 @@ uninstall:
 	rm $(PREFIX/bin/$(BIN)
 
 clean:
+	rm ./repo repo-test
 	rm -f $(BIN) $(OBJ)
 
 test: $(filter-out src/main.c, $(SRC) test/repo.c)
@@ -24,4 +25,4 @@ test: $(filter-out src/main.c, $(SRC) test/repo.c)
 	@echo
 	@repo-test
 
-.PHONY: clean install uninstall test
+.PHONY: clean install uninstall test repo

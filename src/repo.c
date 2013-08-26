@@ -106,12 +106,6 @@ repo_dir_item_new (char *root, struct dirent *fd, repo_dir_t *dir) {
 
   assert((int) strlen(item->name) == (int) strlen(fd->d_name));
 
-  // if (0 != errno && ENOENT != errno) {
-  //   fprintf(stderr, "(%s): ", item->path);
-  //   perror("repo: dir: item: error:");
-  //   exit(0);
-  // }
-
   return item;
 }
 

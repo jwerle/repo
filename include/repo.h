@@ -2,6 +2,7 @@
 #ifndef __REPO_H__
 #define __REPO_H__
 
+#define REPO_VERSION "0.0.1"
 
 #if __GNUC__ >= 4
 # define REPO_EXTERN(type) extern \
@@ -98,6 +99,16 @@ typedef struct repo_dir {
 } repo_dir_t;
 
 
+// git
+
+typedef struct git_progress_payload {
+  git_transfer_progress fetch_progress;
+  size_t completed_steps;
+  size_t total_steps;
+  const char *path;
+} git_progress_payload_t;
+
+
 REPO_EXTERN(repo_user_t *)
 repo_user_new ();
 
@@ -131,6 +142,10 @@ repo_git_init (repo_dir_item_t *item);
 
 REPO_EXTERN(bool)
 repo_is_git_repo (repo_dir_item_t *item);
+
+REPO_EXTERN(int)
+repo_clone (repo_dir_t *repo, const char *url, const char *path);
+
 
 
 #ifdef __cplusplus

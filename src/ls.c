@@ -16,4 +16,6 @@ repo_dir_ls (repo_t *repo) {
       printf("%s (%s)\n", item->name, item->git_branch);
     }
   }
+
+  free(dir);
 }
