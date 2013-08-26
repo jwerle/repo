@@ -1,5 +1,5 @@
 
-#include "repo.h"
+#include <repo.h>
 
 void 
 repo_git_check (int error, const char *message, const char *extra) {
@@ -28,16 +28,31 @@ repo_git_check (int error, const char *message, const char *extra) {
 
 void
 repo_git_init (repo_dir_item_t *item) {
-	git_repository *git_repo = item->git_repo;
 	int error = 0;
 	const char *branch = item->git_branch;
+	// const git_status_entry *entry;
+
+	git_repository *git_repo = item->git_repo;
 	git_reference *head = item->git_head;
+	git_status_options opt = GIT_STATUS_OPTIONS_INIT;
+	git_status_list *status;
+	
+	// size_t entrycount = git_status_list_entrycount(status);
+
+
+	opt.show  = GIT_STATUS_SHOW_INDEX_AND_WORKDIR;
+	opt.flags = GIT_STATUS_OPT_INCLUDE_UNTRACKED
+		        | GIT_STATUS_OPT_RENAMES_HEAD_TO_INDEX
+		        | GIT_STATUS_OPT_SORT_CASE_SENSITIVELY;
+
 
 	// open repo and check for integrity
 	repo_git_check(
 		git_repository_open_ext(&git_repo, item->path, 0, NULL),
 		"Failed to open git repository", item->path
 	);
+
+	item->is_bare = git_repository_is_bare(git_repo)? true : false;
 
 	item->is_git_repo = true;
 

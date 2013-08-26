@@ -1,6 +1,6 @@
 
 #include <assert.h>
-#include "repo.h"
+#include <repo.h>
 
 static void 
 print_progress (const git_progress_payload_t *payload) {

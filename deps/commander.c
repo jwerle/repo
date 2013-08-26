@@ -11,6 +11,12 @@
 #include <assert.h>
 #include "commander.h"
 
+
+static void
+noop (command_t *self) {
+
+}
+
 /*
  * Output error and exit.
  */
@@ -37,20 +43,14 @@ command_version(command_t *self) {
 
 void
 command_help(command_t *self) {
-  printf("\n");
-  printf("  Usage: %s %s\n", self->name, self->usage);
-  printf("\n");
-  printf("  Options:\n");
-  printf("\n");
+  printf("usage: %s ", self->name);
   for (int i = 0; i < self->option_count; ++i) {
     command_option_t *option = &self->options[i];
-    printf("    %s, %-25s %s\n"
-      , option->small
-      , option->large_with_arg
-      , option->description);
+    if (!option->large_with_arg) continue;
+    printf("[%s] "
+      , option->large_with_arg);
   }
-  printf("\n");
-  exit(0);
+  printf("<command> [<args>]\n");
 }
 
 /*
@@ -66,7 +66,7 @@ command_init(command_t *self, const char *name, const char *version) {
   self->usage = "[options]";
   self->nargv = NULL;
   command_option(self, "-V", "--version", "output program version", command_version);
-  command_option(self, "-h", "--help", "output help information", command_help);
+  command_option(self, "-h", "--help", "output help information", noop);
 }
 
 /*

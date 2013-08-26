@@ -1,34 +1,8 @@
 
+
+
 #ifndef __REPO_H__
 #define __REPO_H__
-
-#define REPO_VERSION "0.0.1"
-
-#if __GNUC__ >= 4
-# define REPO_EXTERN(type) extern \
-   __attribute__((visibility("default"))) \
- type
-#elif define(_MSC_VER)
-# define REPO_EXTERN(type) __declspec(dllexport) type
-#else
-# define REPO_EXTERN(type) extern type
-#endif
-
-
-#ifdef _MSC_VER
-# define REPO_INLINE(type) static __inline type
-#else
-# define REPO_INLINE(type) static inline type
-#endif
-
-
-#define REPO_PATH_MAX 4096
-#define REPO_NAME_MAX 256
-#define REPO_MAX_DIR_SIZE 500
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include <unistd.h> // getlogin(), getcwd(), getuid()
 #include <stdlib.h>
@@ -41,8 +15,40 @@ extern "C" {
 #include <dirent.h> // readdir(), opendir(), scandir()
 #include <errno.h>
 
-#include "json.h"
-#include "git2.h"
+#include <commander.h>
+#include <json.h>
+#include <git2.h>
+
+#define REPO_VERSION "0.0.1"
+
+#if __GNUC__ >= 4
+# define REPO_EXTERN(type) extern \
+   __attribute__((visibility("default"))) \
+ type
+#elif define(_MSC_VER)
+# define REPO_EXTERN(type) __declspec(dllexport) type
+#else
+# define REPO_EXTERN(type) extern "C" type
+#endif
+
+
+#ifdef _MSC_VER
+# define REPO_INLINE(type) static __inline type
+#else
+# define REPO_INLINE(type) static inline type
+#endif
+
+#define out(s) printf("%s\n", s);
+
+#define repo_error(s) \
+ fprintf(stderr, "repo: error: %s\n", s);
+
+#define REPO_PATH_MAX 4096
+#define REPO_NAME_MAX 256
+#define REPO_MAX_DIR_SIZE 500
+
+
+
 
 /**
  * Type structure that represents a repos directory
@@ -76,6 +82,7 @@ typedef struct repo_dir_item {
   int ino;
   bool is_git_repo;
   bool is_git_orphan;
+  bool is_bare;
   char *name;
   char *path;
   const char *git_branch;
@@ -109,48 +116,103 @@ typedef struct git_progress_payload {
 } git_progress_payload_t;
 
 
-REPO_EXTERN(repo_user_t *)
+typedef struct repo_session {
+  repo_user_t *user;
+  command_t *program;
+  int argc;
+  char *argv[];
+} repo_session_t;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+repo_session_t *
+repo_session_init (int argc, char *argv[]);
+
+repo_session_t *
+repo_session_start (repo_session_t *sess);
+
+void
+repo_session_free (repo_session_t *sess);
+
+repo_session_t *
+repo_session_get_current ();
+
+repo_user_t *
 repo_user_new ();
 
-REPO_EXTERN(repo_t *)
+repo_t *
 repo_new (char *path);
 
-REPO_EXTERN(void)
+void
 repo_free (repo_user_t *user);
 
-REPO_EXTERN(repo_t *)
+repo_t *
 repo_set (repo_user_t *user, char *path);
 
 
 // dir
-REPO_EXTERN(void)
+void
 repo_dir_ls (repo_t *repo);
 
-REPO_EXTERN(repo_dir_t *)
+repo_dir_t *
 repo_dir_new (char *path);
 
-REPO_EXTERN(repo_dir_item_t *)
+repo_dir_item_t *
 repo_dir_item_new(char *root, struct dirent *fd, repo_dir_t *dir);
 
+// util
+void
+repo_help_commands ();
+
+void
+repo_help (repo_session_t *sess, bool show_commands);
 
 // git
-REPO_EXTERN(void)
+void
 repo_git_check (int error, const char *message, const char *extra);
 
-REPO_EXTERN(void)
+void
 repo_git_init (repo_dir_item_t *item);
 
-REPO_EXTERN(bool)
+bool
 repo_is_git_repo (repo_dir_item_t *item);
 
-REPO_EXTERN(int)
+int
 repo_clone (repo_dir_t *repo, const char *url, const char *path);
 
+// commands
+bool
+repo_cmd_is (const char * cmd);
 
+bool
+repo_has_cmds (repo_session_t *sess);
+
+void
+repo_cmd_ls (repo_session_t *sess);
+
+bool
+repo_cmd_needs_help (repo_session_t *sess);
+
+bool
+repo_cmd_is_flag (char *flag);
+
+bool
+repo_cmd_has_flag (const char *flag);
+
+void
+repo_cmd_cmd (repo_session_t *sess);
+
+bool
+repo_cmd_has (const char *cmd);
+
+void
+repo_cmd_parse (repo_session_t *sess);
 
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif

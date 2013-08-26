@@ -1,6 +1,24 @@
 
 #include <assert.h>
-#include "repo.h"
+#include <repo.h>
+
+
+void
+repo_help_commands () {
+  // commands
+  out("");
+  out("commands:");
+  out("   ls     List all git repositories");
+}
+
+
+void
+repo_help (repo_session_t *sess, bool show_commands) {
+  command_help(sess->program);
+  if (false != show_commands) repo_help_commands();
+  repo_session_free(sess);
+  exit(0);
+}
 
 
 repo_user_t *
@@ -113,3 +131,68 @@ repo_dir_item_new (char *root, struct dirent *fd, repo_dir_t *dir) {
 
 
 
+// commands
+void
+repo_cmd_parse (repo_session_t *sess) {
+  command_t cmd = *sess->program;
+  command_parse(&cmd, sess->argc, sess->argv);
+}
+
+bool
+repo_cmd_is (const char *cmd) {
+  repo_session_t *sess = repo_session_get_current();
+  if (0 == strcmp(cmd, sess->argv[1])) return true;
+  else return false;
+}
+
+bool
+repo_has_cmds (repo_session_t *sess) {
+  if (sess->argc > 1 && 0 != strncmp("-", sess->argv[1], 1)) 
+    return true;
+  return false;
+}
+
+bool
+repo_cmd_has (const char *cmd) {
+  repo_session_t *sess = repo_session_get_current();
+  if (1 == sess->argc) return false;
+  for (int i = 0; i < sess->argc; ++i) {
+    if (0 == strcmp(cmd, sess->argv[i])) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+
+bool
+repo_cmd_needs_help (repo_session_t *sess) {
+  if (1 == sess->argc) return false;
+  for (int i = 0; i < sess->argc; ++i) {
+    if (0 == strcmp("--help", sess->argv[i]) || 0 == strcmp("-h", sess->argv[i])) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool
+repo_cmd_is_flag (char *cmd) {
+  return 0 == strncmp("-", cmd, 1)? true : false;
+}
+
+bool
+repo_cmd_has_flag (const char *flag) {
+  repo_session_t *sess = repo_session_get_current();
+  if (1 == sess->argc) return false;
+  for (int i = 0; i < sess->argc; ++i) {
+    char longname[64], shortname[64];
+    sprintf(longname, "--%s", flag);
+    if (0 == strcmp(longname, sess->argv[i])) return true;
+    snprintf(shortname, 3, "-%s", flag);
+    if (0 == strcmp(shortname, sess->argv[i])) return true;
+  }
+  return false;
+}

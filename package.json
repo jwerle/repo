@@ -21,5 +21,8 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/jwerle/repo/issues"
+  },
+  "dependencies": {
+    "bindings": "~1.1.1"
   }
 }
