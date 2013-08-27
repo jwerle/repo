@@ -58,7 +58,7 @@ repo_session_init (int argc, char *argv[]) {
   command_init(program, "repo", REPO_VERSION);
 	
 	// defualt options
-  command_option(program, "-R", "--repos [repos]", "Directory that holds git repositories", on_set_repos_dir);
+  command_option(program, "-R", "--root [path]", "Directory that holds git repositories", on_set_repos_dir);
 
   // copy string
   for (int i = 0; i < argc; ++i) {
