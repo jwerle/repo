@@ -9,7 +9,7 @@ int
 main (int argc, char *argv[]) {
 	// initialize session
 	repo_session_t *sess = repo_session_init(argc, argv);
-
+exit(0);
   // process commands
 	if (argc > 1) {
 		if (repo_cmd_has("ls")) {

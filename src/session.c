@@ -44,7 +44,7 @@ repo_session_init (int argc, char *argv[]) {
 	}
 
 	repo_user_t *user = repo_user_new();
-  assert(user);
+  	assert(user);
 
   repo_t *repo = repo_set(user, "repos");
   assert(repo);
