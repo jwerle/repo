@@ -2,7 +2,6 @@
 #include <assert.h>
 #include <repo.h>
 
-
 void
 repo_help_commands () {
   // commands
@@ -14,12 +13,25 @@ repo_help_commands () {
 
 void
 repo_help (repo_session_t *sess, bool show_commands) {
-  command_help(sess->program);
+  command_help(&sess->program);
   if (false != show_commands) repo_help_commands();
   repo_session_free(sess);
   exit(0);
 }
 
+int
+repo_args_index (const char *str) {
+  repo_session_t *sess = repo_session_get_current();
+
+  for (int i = 0; i < sess->argc; ++i) {
+    // printf("%s %s %d\n", str, (char *)sess->argv[i], strcmp(str, (char *)sess->argv[i]));
+    if (0 == strcmp(str, (char *)sess->argv[i])) {
+      return i;
+    }
+  }
+
+  return -1;
+}
 
 repo_user_t *
 repo_user_new () {
@@ -79,6 +91,9 @@ repo_dir_new (char *path) {
   repo_dir_t *dir;
   DIR *dir_;
 
+  if (!repo_is_dir(path))
+    return NULL;
+
   if (!(dir = malloc(sizeof(repo_dir_t))))
     return NULL;
   
@@ -127,14 +142,28 @@ repo_dir_item_new (char *root, struct dirent *fd, repo_dir_t *dir) {
   return item;
 }
 
+bool
+repo_is_dir (char *path) {
+  struct stat s;
+  int err = stat(path, &s);
+  
+  if (-1 == err) return false;
+  else if (S_ISDIR(s.st_mode)) return true;
+  else return false;
+}
 
-
+void
+repo_printf (const char *format, const char *str) {
+  char fmt[256];
+  sprintf(fmt, "repo: %s", format);
+  printf(fmt, str);
+}
 
 
 // commands
 void
 repo_cmd_parse (repo_session_t *sess) {
-  command_t cmd = *sess->program;
+  command_t cmd = sess->program;
   command_parse(&cmd, sess->argc, sess->argv);
 }
 
@@ -186,13 +215,35 @@ repo_cmd_is_flag (char *cmd) {
 bool
 repo_cmd_has_flag (const char *flag) {
   repo_session_t *sess = repo_session_get_current();
-  if (1 == sess->argc) return false;
+  
+  if (1 == sess->argc)
+    return false;
+
   for (int i = 0; i < sess->argc; ++i) {
     char longname[64], shortname[64];
     sprintf(longname, "--%s", flag);
-    if (0 == strcmp(longname, sess->argv[i])) return true;
     snprintf(shortname, 3, "-%s", flag);
-    if (0 == strcmp(shortname, sess->argv[i])) return true;
+
+    if (0 == strcmp(longname, sess->argv[i])) 
+      return true;
+    
+    if (0 == strcmp(shortname, sess->argv[i])) 
+      return true;
   }
+
   return false;
+}
+
+
+char *
+repo_str_replace (char str[], 
+                  const char *search, 
+                  const char *replacement, 
+                  size_t size) {
+
+  char *pch;
+  pch = strstr(str, search);
+  strncpy (pch, replacement, (int) size);
+  return str;
+
 }

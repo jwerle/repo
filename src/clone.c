@@ -1,6 +1,7 @@
 
 #include <assert.h>
 #include <repo.h>
+#include <libgen.h>
 
 static void 
 print_progress (const git_progress_payload_t *payload) {
@@ -46,8 +47,11 @@ on_cred_acquire(git_cred **out,
 
 
 int
-repo_clone (repo_dir_t *repo, const char *url, const char *path) {
+repo_clone (repo_t *repo, const char *url, const char *path) {
 	int error;
+	char dest_path[256];
+	sprintf(dest_path, "%s/%s", repo->path, path);
+
 	git_progress_payload_t payload = {{ 0 }};
 	git_repository *cloned_repo = NULL;
 	git_clone_options clone_opts = GIT_CLONE_OPTIONS_INIT;
@@ -62,13 +66,62 @@ repo_clone (repo_dir_t *repo, const char *url, const char *path) {
 	clone_opts.fetch_progress_payload = &payload;
 	clone_opts.cred_acquire_cb = on_cred_acquire;
 
-	error = git_clone(&cloned_repo, url, path, &clone_opts);
-	printf("\n");
+	error = git_clone(&cloned_repo, url, dest_path, &clone_opts);
+	
+	puts("");
+
 	if (error != 0) {
 		const git_error *err = giterr_last();
 		if (err) printf("ERROR %d: %s\n", err->klass, err->message);
 		else printf("ERROR %d: no detailed info\n", error);
+	} else if (cloned_repo) {
+		git_repository_free(cloned_repo);
 	}
-	else if (cloned_repo) git_repository_free(cloned_repo);
 	return error;
+}
+
+
+void
+repo_cmd_clone (repo_session_t *sess) {
+	int n = repo_args_index("clone");
+	
+	if (-1 == n) 
+		n = 0;
+	
+	char *remote, *tmp_dest, dest[256], abspath[256];
+	repo_t *repo = sess->user->repo;
+
+  if (NULL != (remote = sess->argv[n + 1])) {
+    if (repo_cmd_needs_help(sess)) {
+      repo_help(sess, false);
+      exit(0);
+    }
+
+    repo_session_start(sess);
+  }
+
+  
+
+  if (NULL != (tmp_dest = sess->argv[n + 2])) {
+  	sprintf(dest, "%s", tmp_dest);
+  } else {
+  	char *base = basename(remote);
+  	sprintf(dest, "%s", repo_str_replace(base, ".git", "", 4));
+  }
+
+  sprintf(abspath, "%s/%s", repo->path, dest);
+
+  if (repo_is_dir(abspath)) {
+  	repo_ferror("clone: Destination '%s' already exists", dest);
+  }
+
+  puts("");
+  puts("cloning..");
+  printf("  %s -> %s\n", remote, dest);
+  puts("");
+
+  repo_clone(repo, remote, dest);
+
+  repo_session_free(sess);
+  exit(0);
 }

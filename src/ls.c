@@ -10,22 +10,23 @@ repo_cmd_ls (repo_session_t *sess) {
       exit(0);
     }
 
-    if (repo_cmd_has_flag("file")) {
-      puts("file");
-      exit(0);
-    }
+    repo_session_start(sess);
   }
 
   repo_dir_ls(sess->user->repo);
 
-  // repo_session_free(sess);
-  // exit(0);
+  repo_session_free(sess);
+  exit(0);
 }
 
 void
 repo_dir_ls (repo_t *repo) {
   repo_dir_t *dir = repo_dir_new(repo->path);
   
+  if (!dir) {
+    repo_ferror("path does not exist '%s'", repo->path);
+  }
+
   assert(dir->path);
   assert(dir->items);
   assert(dir->length);

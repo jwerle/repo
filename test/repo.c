@@ -16,7 +16,7 @@ main (int argc, char *argv[]) {
   repo_dir_ls(user->repo);
   //printf("repo->repo->path = %s\n", user->repo->path);
   repo_free(user);
-  repo_clone(repo_dir_new(user->repo->path), "https://github.com/humanshell/assembly.git", "assembly");
+  repo_clone(user->repo, "https://github.com/humanshell/assembly.git", "assembly");
   puts("pass +");
   return 0;
 }

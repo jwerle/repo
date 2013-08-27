@@ -21,10 +21,15 @@
 
 #define REPO_VERSION "0.0.1"
 
+
+#define REPO_PATH_MAX 4096
+#define REPO_NAME_MAX 256
+#define REPO_MAX_DIR_SIZE 500
+
+
 #if __GNUC__ >= 4
-# define REPO_EXTERN(type) extern \
-   __attribute__((visibility("default"))) \
- type
+# define REPO_EXTERN(type) extern                \
+  __attribute__((visibility("default"))) type    
 #elif define(_MSC_VER)
 # define REPO_EXTERN(type) __declspec(dllexport) type
 #else
@@ -38,14 +43,21 @@
 # define REPO_INLINE(type) static inline type
 #endif
 
+
 #define out(s) printf("%s\n", s);
 
-#define repo_error(s) \
+
+#define repo_error(s)                            \
  fprintf(stderr, "repo: error: %s\n", s);
 
-#define REPO_PATH_MAX 4096
-#define REPO_NAME_MAX 256
-#define REPO_MAX_DIR_SIZE 500
+
+#define repo_ferror(fmt, s)                      \
+ char t[256];                                    \
+ sprintf(t, "repo: error: %s\n", fmt);           \
+ fprintf(stderr, t, s);                          \
+ exit(1);                                                               
+
+
 
 
 
@@ -118,7 +130,7 @@ typedef struct git_progress_payload {
 
 typedef struct repo_session {
   repo_user_t *user;
-  command_t *program;
+  command_t program;
   int argc;
   char *argv[];
 } repo_session_t;
@@ -164,6 +176,13 @@ repo_dir_item_t *
 repo_dir_item_new(char *root, struct dirent *fd, repo_dir_t *dir);
 
 // util
+
+bool
+repo_is_dir (char *path);
+
+void
+repo_printf (const char *format, const char *str);
+
 void
 repo_help_commands ();
 
@@ -181,7 +200,7 @@ bool
 repo_is_git_repo (repo_dir_item_t *item);
 
 int
-repo_clone (repo_dir_t *repo, const char *url, const char *path);
+repo_clone (repo_t *repo, const char *url, const char *path);
 
 // commands
 bool
@@ -190,8 +209,19 @@ repo_cmd_is (const char * cmd);
 bool
 repo_has_cmds (repo_session_t *sess);
 
+
+
+
+// command line commands
 void
 repo_cmd_ls (repo_session_t *sess);
+
+void
+repo_cmd_clone (repo_session_t *sess);
+
+
+
+
 
 bool
 repo_cmd_needs_help (repo_session_t *sess);
@@ -210,6 +240,12 @@ repo_cmd_has (const char *cmd);
 
 void
 repo_cmd_parse (repo_session_t *sess);
+
+int
+repo_args_index (const char *str);
+
+char *
+repo_str_replace (char str[], const char *search, const char *replacement, size_t size);
 
 #ifdef __cplusplus
 }

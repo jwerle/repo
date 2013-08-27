@@ -8,7 +8,7 @@ PREFIX = /usr/local
 BIN = repo
 CFLAGS = -std=c99 -lm -I deps -I include 
 
-CMDS = ls
+CMDS = ls clone
 
 all: repo $(CMDS)
 

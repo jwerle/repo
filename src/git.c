@@ -90,5 +90,3 @@ repo_is_git_repo (repo_dir_item_t *item) {
 }
 
 
-
-

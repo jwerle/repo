@@ -12,9 +12,22 @@ repo_session_get_current () {
 }
 
 void
-on_set_repo (command_t *self) {
-	puts("dir set");
-	// printf("repos directory set to %s\n", self->arg);
+on_set_repos_dir (command_t *self) {
+	repo_session_t *sess = repo_session_get_current();
+	char *path = sess->user->repo->path;
+
+	if (NULL != self->arg) {
+		char tmp_path[256];
+
+		if (repo_is_dir((char *)self->arg)) {
+			sess->user->repo->path = path = (char *)self->arg;
+		} else {
+			repo_ferror("'%s' is not a valid path", path);
+		}
+
+		repo_printf("Root directory set to '%s'\n"
+				, sess->user->repo->path);
+	}
 }
 
 
@@ -36,15 +49,16 @@ repo_session_init (int argc, char *argv[]) {
   repo_t *repo = repo_set(user, "repos");
   assert(repo);
 
-  command_t program;
-
   sess->user = user;
   sess->argc = argc;
-	sess->program = &program;
+
+  command_t *program = &sess->program;
+	// sess->program = program;
 	// init with version
-  command_init(sess->program, "repo", REPO_VERSION);
-	// options
-  command_option(sess->program, "-R", "--repos [repos]", "Directory that holds git repositories", on_set_repo);
+  command_init(program, "repo", REPO_VERSION);
+	
+	// defualt options
+  command_option(program, "-R", "--repos [repos]", "Directory that holds git repositories", on_set_repos_dir);
 
   // copy string
   for (int i = 0; i < argc; ++i) {
@@ -57,8 +71,7 @@ repo_session_init (int argc, char *argv[]) {
 
 repo_session_t *
 repo_session_start (repo_session_t *sess) {
-	// parse
-  
+  command_parse(&sess->program, sess->argc, sess->argv);
   return sess;
 }
 
