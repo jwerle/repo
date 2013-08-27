@@ -30,7 +30,7 @@
 #if __GNUC__ >= 4
 # define REPO_EXTERN(type) extern                \
   __attribute__((visibility("default"))) type    
-#elif define(_MSC_VER)
+#elif defined(_MSC_VER)
 # define REPO_EXTERN(type) __declspec(dllexport) type
 #else
 # define REPO_EXTERN(type) extern "C" type
