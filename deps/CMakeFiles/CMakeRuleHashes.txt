@@ -1,2 +1,0 @@
-# Hashes of file build rules.
-f784ce68c8892dabd37fdc515f96384d ../tests-clar/clar.suite
