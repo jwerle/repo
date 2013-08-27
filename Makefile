@@ -6,7 +6,7 @@ SRC += $(LIBGIT)
 OBJ = $(SRC:.c=.o)
 PREFIX = /usr/local
 BIN = repo
-CFLAGS = -std=c99 -lm -I deps -I include 
+CFLAGS = -std=c99 -lm -I deps -I include  -I libgit2/include
 
 CMDS = ls clone
 
