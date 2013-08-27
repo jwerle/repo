@@ -14,6 +14,7 @@
 #include <pwd.h> // getpwuid()
 #include <dirent.h> // readdir(), opendir(), scandir()
 #include <errno.h>
+#include <stdarg.h>
 
 #include <commander.h>
 #include <json.h>
@@ -29,7 +30,7 @@
 
 #if __GNUC__ >= 4
 # define REPO_EXTERN(type) extern                \
-  __attribute__((visibility("default"))) type    
+  __attribute__((visibility("default"))) type
 #elif defined(_MSC_VER)
 # define REPO_EXTERN(type) __declspec(dllexport) type
 #else
@@ -51,11 +52,11 @@
  fprintf(stderr, "repo: error: %s\n", s);
 
 
-#define repo_ferror(fmt, s)                      \
+#define repo_ferror(fmt, ...)                    \
  char t[256];                                    \
  sprintf(t, "repo: error: %s\n", fmt);           \
- fprintf(stderr, t, s);                          \
- exit(1);                                                               
+ fprintf(stderr, t, ##__VA_ARGS__);              \
+ exit(1);
 
 
 
@@ -218,7 +219,6 @@ repo_cmd_ls (repo_session_t *sess);
 
 void
 repo_cmd_clone (repo_session_t *sess);
-
 
 
 

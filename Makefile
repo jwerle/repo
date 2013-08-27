@@ -12,7 +12,7 @@ CMDS = ls clone
 
 all: repo $(CMDS)
 
-repo: git
+repo: 
 	$(CC) $(SRC) main.c $(CFLAGS) -o $@
 
 %: cmd/%.c
