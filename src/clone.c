@@ -10,7 +10,9 @@ print_progress (const git_progress_payload_t *payload) {
 	int checkout_percent = (payload->total_steps > 0)? (100 * payload->completed_steps) / payload->total_steps : 0.f;
 	int kbytes = payload->fetch_progress.received_bytes / 1024;
 
-	printf("net: %3d (%4d kb, %5d/%5d) \n", network_percent, kbytes, payload->fetch_progress.received_objects, payload->fetch_progress.total_objects);
+  usleep(20000);
+	printf("\rnet: %3d (%4d kb, %5d/%5d) ", network_percent, kbytes, payload->fetch_progress.received_objects, payload->fetch_progress.total_objects);
+  fflush(stdout);
 }
 
 
