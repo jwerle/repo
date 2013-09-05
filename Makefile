@@ -5,7 +5,7 @@ SRC += $(wildcard deps/*.c)
 SRC += $(LIBGIT)
 OBJ = $(SRC:.c=.o)
 PREFIX = /usr/local
-BIN = repo
+BINS = repo $(addprefix repo-, ls clone)
 CFLAGS = -std=c99 -lm -I deps -I include  -I libgit2/include
 
 CMDS = ls clone
@@ -23,7 +23,7 @@ git:
 	cd ./libgit2/build && cmake .. && cmake --build .
 
 install:
-	install $(BIN) $(PREFIX)/bin
+	install $(BINS) $(PREFIX)/bin
 
 uninstall:
 	rm $(PREFIX/bin/$(BIN)
