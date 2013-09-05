@@ -7,7 +7,8 @@ repo_help_commands () {
   // commands
   out("");
   out("commands:");
-  out("   ls     List all git repositories");
+  out("   ls           List all git repositories");
+  out("   clone <url>  Clone a repo into your repos path");
 }
 
 
@@ -151,14 +152,6 @@ repo_is_dir (char *path) {
   else if (S_ISDIR(s.st_mode)) return true;
   else return false;
 }
-
-void
-repo_printf (const char *format, const char *str) {
-  char fmt[256];
-  sprintf(fmt, "repo: %s", format);
-  printf(fmt, str);
-}
-
 
 // commands
 void

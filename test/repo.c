@@ -4,19 +4,11 @@
 
 int
 main (int argc, char *argv[]) {
-  repo_user_t *user = repo_user_new();
-  assert(user);
-  assert(user->name);
-  assert(user->homedir);
-  assert(user->cwd);
+  repo_session_t *sess = repo_session_init(argc, argv);
 
-  repo_t *repo = repo_set(user, "repos");
-  assert(repo->path);
-
-  repo_dir_ls(user->repo);
-  //printf("repo->repo->path = %s\n", user->repo->path);
-  repo_free(user);
-  repo_clone(user->repo, "https://github.com/humanshell/assembly.git", "assembly");
+  repo_session_start(sess);
+  repo_clone(sess->user->repo, "https://github.com/humanshell/assembly.git", "assembly");
+  repo_session_free(sess);
   puts("pass +");
   return 0;
 }

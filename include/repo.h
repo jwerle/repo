@@ -2,7 +2,7 @@
 
 
 #ifndef __REPO_H__
-#define __REPO_H__
+#define __REPO_H__ 1
 
 #include <unistd.h> // getlogin(), getcwd(), getuid()
 #include <stdlib.h>
@@ -14,6 +14,7 @@
 #include <pwd.h> // getpwuid()
 #include <dirent.h> // readdir(), opendir(), scandir()
 #include <errno.h>
+#include <stdarg.h>
 
 #include <commander.h>
 #include <json.h>
@@ -29,7 +30,7 @@
 
 #if __GNUC__ >= 4
 # define REPO_EXTERN(type) extern                \
-  __attribute__((visibility("default"))) type    
+  __attribute__((visibility("default"))) type
 #elif defined(_MSC_VER)
 # define REPO_EXTERN(type) __declspec(dllexport) type
 #else
@@ -51,14 +52,21 @@
  fprintf(stderr, "repo: error: %s\n", s);
 
 
-#define repo_ferror(fmt, s)                      \
+#define repo_log(s)                              \
+ printf("repo: %s\n", s);
+
+
+#define repo_ferror(fmt, ...)                    \
  char t[256];                                    \
  sprintf(t, "repo: error: %s\n", fmt);           \
- fprintf(stderr, t, s);                          \
- exit(1);                                                               
+ fprintf(stderr, t, ##__VA_ARGS__);              \
+ exit(1);
 
 
-
+#define repo_printf(fmt, ...)                    \
+  char t[256];                                   \
+  sprintf(t, "repo: %s", fmt);                   \
+  printf(t, ##__VA_ARGS__);
 
 
 
@@ -181,9 +189,6 @@ bool
 repo_is_dir (char *path);
 
 void
-repo_printf (const char *format, const char *str);
-
-void
 repo_help_commands ();
 
 void
@@ -218,7 +223,6 @@ repo_cmd_ls (repo_session_t *sess);
 
 void
 repo_cmd_clone (repo_session_t *sess);
-
 
 
 

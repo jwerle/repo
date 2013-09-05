@@ -18,7 +18,7 @@ exit(0);
 			repo_cmd_clone(sess);
 		} else if (repo_cmd_has("cmd")) {
 			repo_cmd_cmd(sess);
-		} else if (repo_cmd_has("help")) {
+    } else if (repo_cmd_has("help")) {
 			repo_help(sess, true);
 		} else if (!repo_cmd_is_flag(argv[1])) {
 			printf("repo: '%s' is not a repo command. See 'repo --help'.\n", argv[1]);

@@ -14,6 +14,7 @@ OBJ = $(SRC:.c=.o)
 PREFIX = /usr/local
 BIN = repo
 CFLAGS = -std=c99 -lm -L./libgit2/build -Wl,-rpath=./libgit2/build -lgit2 -I deps -I include -I libgit2/include
+BINS = repo $(addprefix repo-, ls clone)
 
 CMDS = ls clone
 
@@ -30,7 +31,7 @@ git:
 	cd ./libgit2/build && cmake .. && cmake --build .
 
 install:
-	install $(BIN) $(PREFIX)/bin
+	install $(BINS) $(PREFIX)/bin
 
 uninstall:
 	rm $(PREFIX/bin/$(BIN)
