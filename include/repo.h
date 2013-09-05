@@ -2,7 +2,7 @@
 
 
 #ifndef __REPO_H__
-#define __REPO_H__
+#define __REPO_H__ 1
 
 #include <unistd.h> // getlogin(), getcwd(), getuid()
 #include <stdlib.h>
@@ -52,6 +52,10 @@
  fprintf(stderr, "repo: error: %s\n", s);
 
 
+#define repo_log(s)                              \
+ printf("repo: %s\n", s);
+
+
 #define repo_ferror(fmt, ...)                    \
  char t[256];                                    \
  sprintf(t, "repo: error: %s\n", fmt);           \
@@ -59,7 +63,10 @@
  exit(1);
 
 
-
+#define repo_printf(fmt, ...)                    \
+  char t[256];                                   \
+  sprintf(t, "repo: %s", fmt);                   \
+  printf(t, ##__VA_ARGS__);
 
 
 
@@ -180,9 +187,6 @@ repo_dir_item_new(char *root, struct dirent *fd, repo_dir_t *dir);
 
 bool
 repo_is_dir (char *path);
-
-void
-repo_printf (const char *format, const char *str);
 
 void
 repo_help_commands ();
